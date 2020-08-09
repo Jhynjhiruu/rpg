@@ -1,4 +1,4 @@
-
 *.hex
 *.out
 *.obj
+src/*.obj
