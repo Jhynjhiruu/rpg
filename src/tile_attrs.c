@@ -7,7 +7,7 @@ void null_interaction(u8 ignored)
 	return;
 }
 
-const _rom overworldTile tile_attrs[][256] = {
+const _far overworldTile tile_attrs[][256] = {
 	{
 		{	false, true, null_interaction	},
 		{	false, true, null_interaction	},

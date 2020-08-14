@@ -80,8 +80,8 @@ void overworld_init(void)
 	PLAYER_1_SPRITE.tile = 0;
 	PLAYER_1_SPRITE.ctrl = OAM_ENABLE;
 	
-	player_1_x = CENTRE_X;
-	player_1_y = CENTRE_Y;
+	player_1_x = 0x10;
+	player_1_y = 0x30;
 	
 	camera_x = 0;
 	camera_y = 0;
@@ -104,51 +104,34 @@ void overworld_init(void)
 
 void overworld_mainloop(void)
 {
-	u8 available_directions = 0xFF, tilemap_index = ((player_1_x - camera_x) >> 3) + ((player_1_y - camera_y) << 1);
+	u8 tilemap_index = ((player_1_x - camera_x) >> 3) + ((player_1_y - camera_y) << 1);
+	
+	overworldTile * attrs = tile_attrs[overworld_tileset >> 1];
 	
 	while(PRC_CONT != 19);
 	
-	if(tile_attrs[overworld_tileset >> 1][TILEMAP[tilemap_index + 2]].canWalkOn || tile_attrs[overworld_tileset >> 1][TILEMAP[tilemap_index + 18]].canWalkOn)
-	{
-		available_directions &= ~KEY_RIGHT;
-	}
-	
-	if(tile_attrs[overworld_tileset >> 1][TILEMAP[tilemap_index - 1]].canWalkOn || tile_attrs[overworld_tileset >> 1][TILEMAP[tilemap_index + 15]].canWalkOn)
-	{
-		available_directions &= ~KEY_LEFT;
-	}
-	
-	if(tile_attrs[overworld_tileset >> 1][TILEMAP[tilemap_index - 16]].canWalkOn || tile_attrs[overworld_tileset >> 1][TILEMAP[tilemap_index - 15]].canWalkOn)
-	{
-		available_directions &= ~KEY_UP;
-	}
-	
-	if(tile_attrs[overworld_tileset >> 1][TILEMAP[tilemap_index + 32]].canWalkOn || tile_attrs[overworld_tileset >> 1][TILEMAP[tilemap_index + 33]].canWalkOn)
-	{
-		available_directions &= ~KEY_DOWN;
-	}
 	
 	
 	
-	if(get_key(KEY_RIGHT) && movement_mode && (available_directions & KEY_RIGHT))
+	if(get_key(KEY_RIGHT) && movement_mode && attrs[TILEMAP[tilemap_index + 2]].canWalkOn && attrs[TILEMAP[tilemap_index + 18]].canWalkOn)
 	{
 		movement_mode = 0;
 		movement_direction = KEY_RIGHT;
 	}
 	
-	if(get_key(KEY_LEFT) && movement_mode && (available_directions & KEY_LEFT))
+	if(get_key(KEY_LEFT) && movement_mode && attrs[TILEMAP[tilemap_index - 1]].canWalkOn && attrs[TILEMAP[tilemap_index + 15]].canWalkOn)
 	{
 		movement_mode = 0;
 		movement_direction = KEY_LEFT;
 	}
 	
-	if(get_key(KEY_UP) && movement_mode && (available_directions & KEY_UP))
+	if(get_key(KEY_UP) && movement_mode && attrs[TILEMAP[tilemap_index - 16]].canWalkOn && attrs[TILEMAP[tilemap_index - 15]].canWalkOn)
 	{
 		movement_mode = 0;
 		movement_direction = KEY_UP;
 	}
 	
-	if(get_key(KEY_DOWN) && movement_mode && (available_directions & KEY_DOWN))
+	if(get_key(KEY_DOWN) && movement_mode && attrs[TILEMAP[tilemap_index + 32]].canWalkOn && attrs[TILEMAP[tilemap_index + 33]].canWalkOn)
 	{
 		movement_mode = 0;
 		movement_direction = KEY_DOWN;
@@ -206,6 +189,9 @@ void overworld_mainloop(void)
 
 	draw_overworld_screen();
 	
+
+
+
 
 	
 	return;
