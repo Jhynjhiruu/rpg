@@ -2,3 +2,6 @@
 *.out
 *.obj
 src/*.obj
+*.min
+*.map
+*.out

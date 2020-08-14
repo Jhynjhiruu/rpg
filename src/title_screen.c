@@ -38,6 +38,8 @@ void title_screen_timer_2h(void) {
 
 void init_title_screen(void)
 {
+	dprintf("initialising title screen");
+	
 	PRC_MODE = 0;
 	
 	// enable power button
@@ -57,6 +59,8 @@ void init_title_screen(void)
 	IRQ_PRI1 = PRI1_TIM2(2);
 	//flag = 0;
 	
+	dprintf("starting title screen");
+	
 	game_state = TITLE_SCREEN;
 }
 
@@ -71,6 +75,9 @@ void display_title_screen(void)
 	if(get_key(KEY_A) && get_key(KEY_A))
 	{
 		u8 i;
+		
+		dprintf("exiting title screen");
+		
 		while(get_key(KEY_A));
 		fadeout(BLACK, 2);
 		end_title_screen();

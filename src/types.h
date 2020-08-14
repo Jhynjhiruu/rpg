@@ -17,4 +17,6 @@ typedef enum _Bool
 	true
 } bool;
 
+#define null (void *)0x0000
+
 #endif

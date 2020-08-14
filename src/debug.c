@@ -40,7 +40,9 @@ void dprintf(const char *fmt, ...) {
 			DEBUG_CHAR = *p;
 		}
 	}
-
+	
+	DEBUG_CHAR = '\n';
+	
 	va_end(ap);
 }
 

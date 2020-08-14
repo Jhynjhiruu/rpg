@@ -1,7 +1,7 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#include "pm.h"
+#include <pm.h>
 
 #define DEBUG_CHAR (*(volatile unsigned char *)(REG_BASE+0xD0))
 #define DEBUG_UHEX8 (*(volatile unsigned char *)(REG_BASE+0xD1))

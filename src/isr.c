@@ -5,6 +5,9 @@
 #include "overworld.h"
 
 void _interrupt(0) prc_frame_copy_irq(void) {
+	#pragma asm
+	PUSH ALL
+	#pragma endasm
 	IRQ_ACT1 |= IRQ1_PRC_COMPLETE;
 	switch(game_state)
 	{
@@ -16,11 +19,17 @@ void _interrupt(0) prc_frame_copy_irq(void) {
 		default:
 			break;		
 	}
+	#pragma asm
+	POP ALL
+	#pragma endasm	
 }
 void _interrupt(0) prc_render_irq(void) {
     _slp();
 }
 void _interrupt(0) timer_2h_underflow_irq(void) {
+	#pragma asm
+	PUSH ALL
+	#pragma endasm	
     IRQ_ACT1 |= IRQ1_TIM2_HI_UF;
 	switch(game_state)
 	{
@@ -31,6 +40,9 @@ void _interrupt(0) timer_2h_underflow_irq(void) {
 		default:
 			break;		
 	}
+	#pragma asm
+	POP ALL
+	#pragma endasm	
 }
 void _interrupt(0) timer_2l_underflow_irq(void) {
     _slp();

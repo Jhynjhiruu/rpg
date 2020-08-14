@@ -5,6 +5,7 @@ const _rom char game_title[12] _at(0x21B0) = "Jynji & Nan!";
 
 #include "state.h"
 #include "interrupt.h"
+#include "debug.h"
 #include "startup_anim.h"
 #include "title_screen.h"
 #include "overworld.h"
@@ -17,6 +18,8 @@ int main(void)
 	
 	set_default_contrast(0x1F);
 	apply_default_contrast();
+	
+	dprintf("init complete");
 	
 	while(true)
 	{

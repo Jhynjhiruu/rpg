@@ -16,11 +16,7 @@ typedef struct
 	void (*interact)(u8 direction);
 } overworldTile;
 
-const _rom overworldTile tile_attrs[][] = {
-	{
-		{	false, true, null_interaction	},
-	},	
-};
+extern const _rom overworldTile tile_attrs[][256];
 
 
 #endif

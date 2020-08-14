@@ -9,6 +9,8 @@ void fadeout(COLOUR fadeColour, u8 delay)
 {
 	u8 i, j;
 	
+	dprintf("fading out");
+	
 	fadeColour ^= 1;
 	
 	for(i = 0; i < get_default_contrast(); i++)
@@ -27,6 +29,8 @@ void fadeout(COLOUR fadeColour, u8 delay)
 void fadein(COLOUR fadeColour, u8 delay)
 {
 	u8 i, j;
+	
+	dprintf("fading in");
 	
 	for(i = 0; i < get_default_contrast(); i++)
 	{
