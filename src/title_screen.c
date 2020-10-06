@@ -1,44 +1,35 @@
 #include "title_screen.h"
 
 #include <pm.h>
+#include <stdio.h>
 
 #include "types.h"
 #include "state.h"
 #include "7colour_screens.h"
-#include "debug.h"
 #include "screenfade.h"
 #include "input.h"
 
-volatile uint8_t * screen_ptr _at(0x14E4);
+volatile uint8_t _rom * screen_ptr;
 
-void title_screen_timer_2h(void) {
-	
-#pragma asm
-	PUSH ALE
-	
-	EXTERN _copy_image_gddram	; copy_image.asm
-	
-	AND [BR:38h], #~6
-	
-	LD BA, [_screen_ptr + 1]
-    CARL _copy_image_gddram
-	
-	OR [BR:38h], #6
-#pragma endasm
+volatile uint16_t index = 0;
 
+void copy_image_gddram(int ptr);
+
+void title_screen_timer_2h(void)
+{
+	TMR2_CTRL_L &= ~(TMR_RESET | TMR_ENABLE);
+	copy_image_gddram(*((u8 *)(&screen_ptr) + 1)); // godawful hack to get the upper 2 bytes of the pointer into BA
+	TMR2_CTRL_L |= (TMR_RESET | TMR_ENABLE);
+	
 	screen_ptr = screens[0] + index;
 	if((index += 0x300) >= SCREENS_LEN * 0x300) index = 0;
-	
-#pragma asm
-	POP ALE
-#pragma endasm
 	
 	return;
 }
 
 void init_title_screen(void)
 {
-	dprintf("initialising title screen");
+	printf("initialising title screen\n");
 	
 	PRC_MODE = 0;
 	
@@ -59,7 +50,7 @@ void init_title_screen(void)
 	IRQ_PRI1 = PRI1_TIM2(2);
 	//flag = 0;
 	
-	dprintf("starting title screen");
+	printf("starting title screen\n");
 	
 	game_state = TITLE_SCREEN;
 }
@@ -76,7 +67,7 @@ void display_title_screen(void)
 	{
 		u8 i;
 		
-		dprintf("exiting title screen");
+		printf("exiting title screen\n");
 		
 		while(get_key(KEY_A));
 		fadeout(BLACK, 2);

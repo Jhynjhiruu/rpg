@@ -1,10 +1,12 @@
 #ifndef _7COLOUR_SCREENS_H
 #define _7COLOUR_SCREENS_H
 
+#include "types.h"
+
 #define NUM_SCREENS 1
 #define SCREENS_LEN 12
 
-const _rom uint8_t screens[NUM_SCREENS][SCREENS_LEN * 0x300] _at(0x8000) = {
+const _rom u8 screens[NUM_SCREENS][SCREENS_LEN * 0x300] _at(0x8000) = {
 	{
 	    0x44, 0x22, 0x11, 0x88, 0x44, 0x22, 0x11, 0x88, 
 		0x44, 0x32, 0x19, 0x80, 0x54, 0x2a, 0x11, 0x98, 

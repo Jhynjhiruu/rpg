@@ -51,7 +51,7 @@ __START:
         ;==========================================================================
         ;===================  system initialization  ==============================
         ;==========================================================================
-        LD      SP,#02000h                      ; stack pointer initialize
+        LD      SP,#@DOFF(__lc_es)              ; stack pointer initialize
         LD      BR,#020h                        ; BR register initialize to I/O area
         LD      [BR:21h],#0Ch
         LD      [BR:25h],#080h
@@ -65,24 +65,11 @@ __START:
         LD      [BR:28h],#0FFh
         LD      [BR:29h],#0FFh
         LD      [BR:2Ah],#0FFh
+		
 	CARL	__copytable
-	
-	DB 0CFh, 0C8h
-	LD HL, PC
-	ADD HL, #0Dh
-	PUSH B
-	PUSH HL
-	LD HL, #_main
-	PUSH B
-	PUSH HL
-	RET
-	
-	;CARL	_main
-	
-	
+	CARL	_main
 	CARL	__exit
 	RETE
-
 
         GLOBAL  __start_cpt
         GLOBAL  __START

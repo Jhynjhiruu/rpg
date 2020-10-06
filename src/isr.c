@@ -4,10 +4,7 @@
 #include "title_screen.h"
 #include "overworld.h"
 
-void _interrupt(0) prc_frame_copy_irq(void) {
-	#pragma asm
-	PUSH ALL
-	#pragma endasm
+void _interrupt(6) prc_frame_copy_irq(void) {
 	IRQ_ACT1 |= IRQ1_PRC_COMPLETE;
 	switch(game_state)
 	{
@@ -19,17 +16,11 @@ void _interrupt(0) prc_frame_copy_irq(void) {
 		default:
 			break;		
 	}
-	#pragma asm
-	POP ALL
-	#pragma endasm	
 }
 void _interrupt(0) prc_render_irq(void) {
     _slp();
 }
-void _interrupt(0) timer_2h_underflow_irq(void) {
-	#pragma asm
-	PUSH ALL
-	#pragma endasm	
+void _interrupt(10) timer_2h_underflow_irq(void) {
     IRQ_ACT1 |= IRQ1_TIM2_HI_UF;
 	switch(game_state)
 	{
@@ -40,9 +31,6 @@ void _interrupt(0) timer_2h_underflow_irq(void) {
 		default:
 			break;		
 	}
-	#pragma asm
-	POP ALL
-	#pragma endasm	
 }
 void _interrupt(0) timer_2l_underflow_irq(void) {
     _slp();
@@ -77,7 +65,7 @@ void _interrupt(0) ir_rx_irq(void) {
 void _interrupt(0) shake_irq(void) {
     _slp();
 }
-void _interrupt(0) key_power_irq(void) {
+void _interrupt(38) key_power_irq(void) {
     IRQ_ACT3 = IRQ3_KEYPOWER;
     if (KEY_PAD & KEY_POWER) return;
     _int(0x48);
@@ -110,7 +98,7 @@ void _interrupt(0) cartridge_irq(void) {
     _slp();
 }
 
-void _exit( int i )
+void _exit(void)
 {
     _int(0x48);
 }

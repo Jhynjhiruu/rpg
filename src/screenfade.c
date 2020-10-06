@@ -1,15 +1,17 @@
 #include "screenfade.h"
 
+#include <pm.h>
+#include <stdio.h>
+
 #include "types.h"
 #include "interrupt.h"
 #include "state.h"
-#include "debug.h"
 
 void fadeout(COLOUR fadeColour, u8 delay)
 {
 	u8 i, j;
 	
-	dprintf("fading out");
+	printf("fading out\n");
 	
 	fadeColour ^= 1;
 	
@@ -30,7 +32,7 @@ void fadein(COLOUR fadeColour, u8 delay)
 {
 	u8 i, j;
 	
-	dprintf("fading in");
+	printf("fading in\n");
 	
 	for(i = 0; i < get_default_contrast(); i++)
 	{
@@ -39,7 +41,6 @@ void fadein(COLOUR fadeColour, u8 delay)
 			while(PRC_CONT != CNT_OVERFLOW);
 			while(PRC_CONT == CNT_OVERFLOW);
 		}
-		
 		adjust_contrast(fadeColour);
 	}
 	apply_default_contrast();

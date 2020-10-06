@@ -5,7 +5,7 @@ GLOBAL _copy_image_gddram
 ; from 48 to 63
 DEFINE SYNC_LINE_NUM "#55"
 
-DEFINE PRC_CNT "[208Ah]"
+DEFINE PRC_CNT "[BR:8Ah]"
 DEFINE LCD_CTRL "[20FEh]"
 DEFINE LCD_DATA "[20FFh]"
 
@@ -44,10 +44,9 @@ DEFSECT ".copy_image_gddram", CODE
 SECT ".copy_image_gddram"
 
 _copy_image_gddram:
-	LD HL, #208Ah
 	
 waitsyncloop:
-	CP [HL], SYNC_LINE_NUM
+	CP PRC_CNT, SYNC_LINE_NUM
 	JRL NZ, waitsyncloop
 	
 	LD BR, A
