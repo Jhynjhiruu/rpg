@@ -174,7 +174,7 @@ void overworld_mainloop(void)
 {
     u8 tilemap_index = ((player_coords[0].x - camera.x) >> 3) + ((player_coords[0].y - camera.y) << 1);
     
-    _rom overworldTile * attrs = tile_attrs[overworld_tileset >> 1];
+    overworldTile _rom * attrs = tile_attrs[overworld_tileset >> 1];
     
     while(PRC_CONT != 19);
     
