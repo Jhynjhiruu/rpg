@@ -79,7 +79,7 @@ fout.write("""#ifndef _SPRITES_H
 """)
 
 fout.write("""const _rom u8 sprites[2][] _at(0x10000) = {
-	{
+    {
 """)
 
 for i, j in enumerate(bimg):
@@ -98,8 +98,8 @@ for i, j in enumerate(bimg):
     for k, l in enumerate(data):
         out[k // 8] = ", ".join([out[k // 8], "0x" + hex(l ^ 0xFF).lstrip("0x").zfill(2).upper()]).lstrip(", ")
     fout.write("\t\t" + ",\n\t\t".join(out) + ",\n")
-fout.write("""	},
-	{
+fout.write("""    },
+    {
 """)
 for i, j in enumerate(wimg):
     tiles = []
@@ -119,7 +119,7 @@ for i, j in enumerate(wimg):
     fout.write("\t\t" + ",\n\t\t".join(out) + ",\n")
 
 fout.write("""
-	}
+    }
 };
 
 #endif""")

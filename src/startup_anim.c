@@ -5,6 +5,6 @@
 // dummy
 void play_startup_anim(void)
 {
-	game_state = TITLE_SCREEN_INIT;
-	return;
+    game_state = TITLE_SCREEN_INIT;
+    return;
 }

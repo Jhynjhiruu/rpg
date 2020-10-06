@@ -109,12 +109,12 @@ fout.write("""#ifndef _TILES_H
 #define TILE_SIZE 8
 
 const _rom u8 tiles[NUM_TILESETS][2][NUM_TILES][TILE_SIZE] _at(0x18000) = {{
-	{{
-		{{\n\t\t\t""".format(len(files), len(bimg)) + "\n\t\t\t".join(bout) + """
-		},
-		{\n\t\t\t""" + "\n\t\t\t".join(wout) + """
-		},
-	},	
+    {{
+        {{\n\t\t\t""".format(len(files), len(bimg)) + "\n\t\t\t".join(bout) + """
+        },
+        {\n\t\t\t""" + "\n\t\t\t".join(wout) + """
+        },
+    },    
 };
 
 #endif""")

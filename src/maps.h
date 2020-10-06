@@ -9,14 +9,14 @@
 
 typedef struct
 {
-	u8 sprite;
-	u8 sprite_attrs;
-	
-	u16 x;
-	u16 y;
-	
-	void (*interact)(void);
-	void (*frame)(void);
+    u8 sprite;
+    u8 sprite_attrs;
+    
+    u16 x;
+    u16 y;
+    
+    void (*interact)(void);
+    void (*frame)(void);
 } Object;
 
 typedef struct 
@@ -158,13 +158,13 @@ const _rom u8 map_data_1[] =
 
 const _rom Object obj_data_0[] = 
 {
-	{	5, OAM_ENABLE, 0x70, 0x90, door_interaction, null_interaction	},	
+    {    5, OAM_ENABLE, 0x70, 0x90, door_interaction, null_interaction    },    
 };
 
 const _rom Map maps[NUM_MAPS] = 
 {
-	{	0, 20, 22, 1, map_data_0, obj_data_0	},
-	{	0, 20, 22, 0, map_data_1, null			},
+    {    0, 20, 22, 1, map_data_0, obj_data_0    },
+    {    0, 20, 22, 0, map_data_1, null            },
 };
 
 #endif

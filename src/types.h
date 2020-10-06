@@ -13,8 +13,8 @@ typedef int32_t s32;
 
 typedef enum _Bool
 {
-	false,
-	true
+    false,
+    true
 } bool;
 
 #define null (void *)0x0000

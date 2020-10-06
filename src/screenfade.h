@@ -7,8 +7,8 @@
 
 typedef enum
 {
-	BLACK,
-	WHITE
+    BLACK,
+    WHITE
 } COLOUR;
 
 void fadeout(COLOUR fadeColour, u8 delay);

@@ -5,8 +5,8 @@
 
 typedef struct
 {
-	s16 x;
-	s16 y;
+    s16 x;
+    s16 y;
 } Coords;
 
 void overworld_frame_copy(void);

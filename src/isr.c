@@ -5,32 +5,32 @@
 #include "overworld.h"
 
 void _interrupt(6) prc_frame_copy_irq(void) {
-	IRQ_ACT1 |= IRQ1_PRC_COMPLETE;
-	switch(game_state)
-	{
-		case OVERWORLD_INIT:
-		case OVERWORLD:
-			overworld_frame_copy();
-			break;
-		
-		default:
-			break;		
-	}
+    IRQ_ACT1 |= IRQ1_PRC_COMPLETE;
+    switch(game_state)
+    {
+        case OVERWORLD_INIT:
+        case OVERWORLD:
+            overworld_frame_copy();
+            break;
+        
+        default:
+            break;        
+    }
 }
 void _interrupt(0) prc_render_irq(void) {
     _slp();
 }
 void _interrupt(10) timer_2h_underflow_irq(void) {
     IRQ_ACT1 |= IRQ1_TIM2_HI_UF;
-	switch(game_state)
-	{
-		case TITLE_SCREEN:
-			title_screen_timer_2h();
-			break;
-		
-		default:
-			break;		
-	}
+    switch(game_state)
+    {
+        case TITLE_SCREEN:
+            title_screen_timer_2h();
+            break;
+        
+        default:
+            break;        
+    }
 }
 void _interrupt(0) timer_2l_underflow_irq(void) {
     _slp();

@@ -44,8 +44,8 @@ JP_FAR  MACRO lbl
         DB      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
         ;; Begin startup code
-	DEFSECT	".startup", CODE, SHORT
-	SECT	".startup"
+    DEFSECT    ".startup", CODE, SHORT
+    SECT    ".startup"
 __start_cpt:
 __START:
         ;==========================================================================
@@ -65,21 +65,24 @@ __START:
         LD      [BR:28h],#0FFh
         LD      [BR:29h],#0FFh
         LD      [BR:2Ah],#0FFh
-		
-	CARL	__copytable
-	CARL	_main
-	CARL	__exit
-	RETE
+        
+    CARL    __copytable
+    CARL    _main
+    CARL    __exit
+    RETE
 
         GLOBAL  __start_cpt
         GLOBAL  __START
-	EXTERN	(CODE) __copytable
-	EXTERN	(CODE) _main
+        
+        EXTERN  __lc_es
+        EXTERN    (CODE) __copytable
+        EXTERN    (CODE) _main
         EXTERN  (CODE) __exit
-	CALLS	'_start_cpt', '_copytable'
-	CALLS	'_start_cpt', 'main'
-	CALLS	'_start_cpt', '_exit'
-
+    
+    CALLS    '_start_cpt', '_copytable'
+    CALLS    '_start_cpt', 'main'
+    CALLS    '_start_cpt', '_exit'
+    
         EXTERN  _prc_frame_copy_irq
         EXTERN  _prc_render_irq
         EXTERN  _timer_2h_underflow_irq
@@ -105,4 +108,4 @@ __START:
         EXTERN  _unknown_irq
         EXTERN  _cartridge_irq
         
-	END
+    END

@@ -3,13 +3,13 @@
 
 typedef enum
 {
-	STARTUP,
-	TITLE_SCREEN_INIT,
-	TITLE_SCREEN,
-	
-	
-	OVERWORLD_INIT,
-	OVERWORLD
+    STARTUP,
+    TITLE_SCREEN_INIT,
+    TITLE_SCREEN,
+    
+    
+    OVERWORLD_INIT,
+    OVERWORLD
 } STATE;
 
 extern STATE game_state;
