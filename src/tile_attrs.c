@@ -57,8 +57,8 @@ const _rom overworldTile tilemap1[256] = {
     {    false, false, false, null_interaction    },
     {    false, true, false, null_interaction    },
     {    false, true, false, null_interaction    },
-    {    false, true, false, null_interaction    },
-    {    false, true, false, null_interaction    },
+    {    false, false, false, null_interaction    },
+    {    false, false, false, null_interaction    },
     
     {    false, true, true, door_interaction    },
     {    false, true, true, door_interaction    },
