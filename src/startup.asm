@@ -66,6 +66,8 @@ __START:
         LD      [BR:29h],#0FFh
         LD      [BR:2Ah],#0FFh
         
+        LD      [BR:02h],#0FFh
+        
     CARL    __copytable
     CARL    _main
     CARL    __exit

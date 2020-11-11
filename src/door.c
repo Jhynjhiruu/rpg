@@ -15,8 +15,10 @@ void door_interaction(void)
 {
     printf("door interact\n");
     
+    ena_obj_interactions = false;
+    
     fadeout(BLACK, 2);
-
+    
     LCD_CTRL = 0xA5;
     
     switch(overworld_map)
@@ -28,8 +30,8 @@ void door_interaction(void)
             camera.x = 0x38;
             camera.y = 0x18;
             
-            prev.x = 0xFF;
-            prev.y = 0xFF;
+            prev.x = -0x8000;
+            prev.y = -0x8000;
             
             overworld_load(1, 1);
             break;
@@ -41,8 +43,8 @@ void door_interaction(void)
             camera.x = 0x38;
             camera.y = 0x58;
             
-            player_coords[0].x = 0xFF;
-            player_coords[0].y = 0xFF;
+            prev.x = -0x8000;
+            prev.y = -0x8000;
             
             overworld_load(0, 1);
             break;

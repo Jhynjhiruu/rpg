@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-#define CNT_OVERFLOW 19
+#define CNT_OVERFLOW 20
 
 typedef enum
 {

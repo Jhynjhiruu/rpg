@@ -7,6 +7,7 @@
 
 #include "maps.h"
 #include "types.h"
+#include "sprite_names.h"
 #include "tiles.h"
 #include "sprites.h"
 #include "screenfade.h"
@@ -18,9 +19,11 @@
 Coords * player_coords;
 Coords camera;
 
-u8 overworld_tileset, frame_counter;
+u8 overworld_tileset, anim_counter, frame_counter;
 
 u8 level_width, level_height;
+
+Object * objects;
 
 u8 movement_direction;
 u8 overworld_map;
@@ -32,18 +35,34 @@ u8 _rom * map_ptr;
 u8 movement_mode;
 u8 movement_counter;
 
+bool ena_obj_interactions;
+
 #define PLAYER_1_SPRITE OAM[0]
 
 #define CENTRE_X 0x28
 #define CENTRE_Y 0x18
 
+#define RESERVED_SPRITES 1
+
 void overworld_frame_copy(void)
 {
     overworld_tileset ^= _BV(0);
-    PRC_MAP = tiles[overworld_tileset >> 1][overworld_tileset & 1];
+    PRC_MAP = tiles[(overworld_tileset >> 1) + anim_counter][overworld_tileset & 1];
     PRC_SPR = sprites[overworld_tileset & 1];
     
     return;
+}
+
+void overworld_8hz_timer(void)
+{
+    if(++frame_counter >= maps[overworld_map].frame_delay)
+    {
+        frame_counter = 0;
+        if(++anim_counter >= maps[overworld_map].anim_frames)
+        {
+            anim_counter = 0;
+        }
+    }
 }
 
 void draw_overworld_tile_data(void)
@@ -51,6 +70,9 @@ void draw_overworld_tile_data(void)
     u8 i;
     u8 xoffs = camera.x >> 3, yoffs = camera.y >> 3;
     u16 mapindex;
+    
+    PRC_SCROLL_X = camera.x & 0x07;
+    PRC_SCROLL_Y = camera.y & 0x07;
     
     if(xoffs != prev.x || yoffs != prev.y)
     {
@@ -62,33 +84,35 @@ void draw_overworld_tile_data(void)
         }
     }
     
-    PRC_SCROLL_X = camera.x & 0x07;
-    PRC_SCROLL_Y = camera.y & 0x07;
-    
     return;
 }
 
 void draw_overworld_screen(void)
 {
-    u8 i;
+    u8 i, used_sprites = 0;
+    
+    draw_overworld_tile_data();
     
     PLAYER_1_SPRITE.x = (player_coords[0].x + 0x10) - camera.x;
     PLAYER_1_SPRITE.y = (player_coords[0].y + 0x10) - camera.y;
     
-    draw_overworld_tile_data();
-    
     for(i = 0; i < maps[overworld_map].numObjects; i++)
     {
-        Object cur_obj = maps[overworld_map].objectData[i];
+        Object cur_obj = objects[i];
         
-        OAM[23 - i].x = cur_obj.x - camera.x;
-        OAM[23 - i].y = cur_obj.y - camera.y;
+        if(cur_obj.sprite_attrs)
+        {
+            OAM[23 - used_sprites].x = cur_obj.x - camera.x;
+            OAM[23 - used_sprites].y = cur_obj.y - camera.y;
+            
+            used_sprites++;
+        }
         
-        if(cur_obj.x == player_coords[0].x + 0x10 && cur_obj.y == player_coords[0].y + 0x10)
+        if(cur_obj.x == player_coords[0].x + 0x10 && cur_obj.y == player_coords[0].y + 0x10 && ena_obj_interactions)
             cur_obj.interact();
         
-        if(maps[overworld_map].objectData != null)
-            maps[overworld_map].objectData[i].frame();
+        if(objects != null)
+            objects[i].frame();
     }
     
     return;
@@ -96,18 +120,20 @@ void draw_overworld_screen(void)
 
 void overworld_init(void)
 {
-    printf("initialising overworld\n");
+    //printf("initialising overworld\n");
     
     PRC_MODE = MAP_ENABLE | MAP_16X12 | SPRITE_ENABLE | COPY_ENABLE;
     PRC_RATE = RATE_36FPS;
     
     IRQ_ENA1 |= IRQ1_PRC_COMPLETE;
-    IRQ_PRI1 = PRI1_PRC(1);
+    IRQ_PRI1 = PRI1_PRC(3);
     
-    PLAYER_1_SPRITE.tile = 4;
+    PLAYER_1_SPRITE.tile = IDLE;
     PLAYER_1_SPRITE.ctrl = OAM_ENABLE;
     
     player_coords = malloc(1 * sizeof(Coords));
+    
+    objects = malloc(sizeof(Object));
     
     player_coords[0].x = 0x00;
     player_coords[0].y = 0x30;
@@ -121,7 +147,7 @@ void overworld_init(void)
     movement_mode = 1;
     movement_direction = 0;
     
-    printf("overworld init complete\n");
+    //printf("overworld init complete\n");
     
     overworld_load(1, 1);
     
@@ -134,7 +160,11 @@ void overworld_load(u8 map, u8 num_players)
 {
     u8 i;
     Map cur_map = maps[map];
+    u8 used_sprites = 0;
     
+    
+    anim_counter = 0;
+    ena_obj_interactions = true;
     
     player_coords = realloc(player_coords, num_players * sizeof(Coords));
     
@@ -149,18 +179,43 @@ void overworld_load(u8 map, u8 num_players)
     level_width = cur_map.xsize;
     level_height = cur_map.ysize;
     
-    for(i = 0; i < cur_map.numObjects; i++)
+    objects = realloc(objects, cur_map.numObjects * sizeof(Object));
+    
+    if(objects != null)
     {
-        Object cur_obj = cur_map.objectData[i];
+        memcpy(objects, cur_map.objectData, cur_map.numObjects * sizeof(Object));
         
-        OAM[23 - i].tile = cur_obj.sprite;
-        OAM[23 - i].ctrl = cur_obj.sprite_attrs;
-    }
-    for(; i < 23; i++)
-    {
-        OAM[23 - i].ctrl = 0;
+        for(i = 0; i < cur_map.numObjects; i++)
+        {
+            Object cur_obj = objects[i];
+            
+            if(cur_obj.sprite_attrs)
+            {
+                OAM[23 - used_sprites].tile = cur_obj.sprite;
+                OAM[23 - used_sprites].ctrl = cur_obj.sprite_attrs;
+                
+                used_sprites++;
+            }
+        }
     }
     
+    for(; used_sprites < 24 - RESERVED_SPRITES; used_sprites++)
+    {
+        OAM[23 - used_sprites].ctrl = 0;
+    }
+    
+    if(cur_map.frame_delay)
+    {
+        IRQ_ENA2 = IRQ2_8HZ;
+        TMR256_CTRL |= 1;
+        IRQ_PRI2 = PRI2_TIM256(1);
+    }
+    else
+    {
+        IRQ_ENA2 = 0;
+        TMR256_CTRL = 0;
+    }
+	
     draw_overworld_screen();
     
     LCD_CTRL = 0xA4;
@@ -176,81 +231,154 @@ void overworld_mainloop(void)
     
     overworldTile _rom * attrs = tile_attrs[overworld_tileset >> 1];
     
-    while(PRC_CONT != 19);
+    //u16 count = 0;
     
-    if(get_key(KEY_RIGHT) && movement_mode)// && attrs[TILEMAP[tilemap_index + 2]].canWalkOn && attrs[TILEMAP[tilemap_index + 18]].canWalkOn)
+    /**(u16 *)0x20D4 = count;
+    *(char *)0x20D0 = '\n';*/
+    
+    if(get_key(KEY_RIGHT) && movement_mode)
     {
-        movement_mode = 0;
-        movement_direction = KEY_RIGHT;
+        PLAYER_1_SPRITE.tile &= ~DIRS;
+        PLAYER_1_SPRITE.tile |= RIGHT;
+        if(movement_mode == 1)
+            movement_mode = 2;
+        else if(movement_mode == 2)
+            movement_mode = 3;
+        else if(movement_mode == 3 && check_tile_attr(attrs, tilemap_index + 2, CanWalkOn) && check_tile_attr(attrs, tilemap_index + 18, CanWalkOn))
+        {
+            movement_mode = 0;
+            movement_direction = KEY_RIGHT;
+            PLAYER_1_SPRITE.tile &= ~IDLE;
+        }
+        else
+        {
+            movement_mode = 1;
+            PLAYER_1_SPRITE.tile &= ~FRAME;
+            PLAYER_1_SPRITE.tile |= IDLE;
+        }
+    }
+    else if(get_key(KEY_LEFT) && movement_mode)
+    {
+        PLAYER_1_SPRITE.tile &= ~DIRS;
+        PLAYER_1_SPRITE.tile |= LEFT;
+        if(movement_mode == 1)
+            movement_mode = 2;
+        else if(movement_mode == 2)
+            movement_mode = 3;
+        else if(movement_mode == 3 && check_tile_attr(attrs, tilemap_index - 1, CanWalkOn) && check_tile_attr(attrs, tilemap_index + 15, CanWalkOn))
+        {
+            movement_mode = 0;
+            movement_direction = KEY_LEFT;
+            PLAYER_1_SPRITE.tile &= ~IDLE;
+        }
+        else
+        {
+            movement_mode = 1;
+            PLAYER_1_SPRITE.tile &= ~FRAME;
+            PLAYER_1_SPRITE.tile |= IDLE;
+        }
     }
     
-    if(get_key(KEY_LEFT) && movement_mode)// && attrs[TILEMAP[tilemap_index - 1]].canWalkOn && attrs[TILEMAP[tilemap_index + 15]].canWalkOn)
+    if(get_key(KEY_UP) && movement_mode)
     {
-        movement_mode = 0;
-        movement_direction = KEY_LEFT;
+        PLAYER_1_SPRITE.tile &= ~DIRS;
+        PLAYER_1_SPRITE.tile |= UP;
+        if(movement_mode == 1)
+            movement_mode = 2;
+        else if(movement_mode == 2)
+            movement_mode = 3;
+        else if(movement_mode == 3 && check_tile_attr(attrs, tilemap_index - 16, CanWalkOn) && check_tile_attr(attrs, tilemap_index - 15, CanWalkOn))
+        {
+            movement_mode = 0;
+            movement_direction = KEY_UP;
+            PLAYER_1_SPRITE.tile &= ~IDLE;
+        }
+        else
+        {
+            movement_mode = 1;
+            PLAYER_1_SPRITE.tile &= ~FRAME;
+            PLAYER_1_SPRITE.tile |= IDLE;
+        }
+    }
+    else if(get_key(KEY_DOWN) && movement_mode)
+    {
+        PLAYER_1_SPRITE.tile &= ~DIRS;
+        PLAYER_1_SPRITE.tile |= DOWN;
+        if(movement_mode == 1)
+            movement_mode = 2;
+        else if(movement_mode == 2)
+            movement_mode = 3;
+        else if(movement_mode == 3 && check_tile_attr(attrs, tilemap_index + 32, CanWalkOn) && check_tile_attr(attrs, tilemap_index + 33, CanWalkOn))
+        {
+            movement_mode = 0;
+            movement_direction = KEY_DOWN;
+            PLAYER_1_SPRITE.tile &= ~IDLE;
+        }
+        else
+        {
+            movement_mode = 1;
+            PLAYER_1_SPRITE.tile &= ~FRAME;
+            PLAYER_1_SPRITE.tile |= IDLE;
+        }
     }
     
-    if(get_key(KEY_UP) && movement_mode)// && attrs[TILEMAP[tilemap_index - 16]].canWalkOn && attrs[TILEMAP[tilemap_index - 15]].canWalkOn)
+    if(movement_mode && !get_key(KEY_RIGHT | KEY_LEFT | KEY_UP | KEY_DOWN))
     {
-        movement_mode = 0;
-        movement_direction = KEY_UP;
-    }
-    
-    if(get_key(KEY_DOWN) && movement_mode)// && attrs[TILEMAP[tilemap_index + 32]].canWalkOn && attrs[TILEMAP[tilemap_index + 33]].canWalkOn)
-    {
-        movement_mode = 0;
-        movement_direction = KEY_DOWN;
+        movement_mode = 1;
+        PLAYER_1_SPRITE.tile &= ~FRAME;
+        PLAYER_1_SPRITE.tile |= IDLE;
     }
     
     if(!movement_mode)
     {
         if(movement_counter > 15)
         {
-            movement_mode = 1;
+            movement_mode = 3;
             movement_counter = 0;
             
-            /*if(attrs[TILEMAP[tilemap_index]].interactOnTouch)
+            if(check_tile_attr(attrs, tilemap_index, InteractOnTouch))
             {
                 attrs[TILEMAP[tilemap_index]].interact();
             }
-            else if(attrs[TILEMAP[tilemap_index + 1]].interactOnTouch)
+            else if(check_tile_attr(attrs, tilemap_index + 1, InteractOnTouch))
             {
                 attrs[TILEMAP[tilemap_index + 1]].interact();
             }
-            else if(attrs[TILEMAP[tilemap_index + 16]].interactOnTouch)
+            else if(check_tile_attr(attrs, tilemap_index + 16, InteractOnTouch))
             {
                 attrs[TILEMAP[tilemap_index + 16]].interact();
             }
-            else if(attrs[TILEMAP[tilemap_index + 17]].interactOnTouch)
+            else if(check_tile_attr(attrs, tilemap_index + 17, InteractOnTouch))
             {
                 attrs[TILEMAP[tilemap_index + 17]].interact();
-            }*/
-        }
-        else
-        {
-            if(movement_counter & 1)
-            {
-                switch(movement_direction)
-                {
-                    case KEY_RIGHT:
-                        player_coords[0].x += 1;
-                        break;
-                    
-                    case KEY_LEFT:
-                        player_coords[0].x -= 1;
-                        break;
-                    
-                    case KEY_UP:
-                        player_coords[0].y -= 1;
-                        break;
-                    
-                    case KEY_DOWN:
-                        player_coords[0].y += 1;
-                        break;
-                }
             }
-            movement_counter += 1;
         }
+        if(movement_counter & 1)
+        {
+            switch(movement_direction)
+            {
+                case KEY_RIGHT:
+                    player_coords[0].x += 1;
+                    break;
+                
+                case KEY_LEFT:
+                    player_coords[0].x -= 1;
+                    break;
+                
+                case KEY_UP:
+                    player_coords[0].y -= 1;
+                    break;
+                
+                case KEY_DOWN:
+                    player_coords[0].y += 1;
+                    break;
+            }
+        }
+        if(!(movement_counter & 7))
+        {
+            PLAYER_1_SPRITE.tile = (PLAYER_1_SPRITE.tile & ~WALK3) | ((PLAYER_1_SPRITE.tile + WALK1) & WALK3);
+        }
+        movement_counter += 1;
     }
     
     if(player_coords[0].x - camera.x != CENTRE_X)
@@ -268,6 +396,8 @@ void overworld_mainloop(void)
     }
 
     draw_overworld_screen();
+    
+    while(PRC_CONT != 19);// count++;
     
     return;
 }

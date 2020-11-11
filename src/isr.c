@@ -50,8 +50,18 @@ void _interrupt(0) timer_3_cmp_irq(void) {
 void _interrupt(0) timer_32hz_irq(void) {
     _slp();
 }
-void _interrupt(0) timer_8hz_irq(void) {
-    _slp();
+void _interrupt(24) timer_8hz_irq(void) {
+    IRQ_ACT2 |= IRQ2_8HZ;
+    switch(game_state)
+    {
+        case OVERWORLD_INIT:
+        case OVERWORLD:
+            overworld_8hz_timer();
+            break;
+        
+        default:
+            break;        
+    }
 }
 void _interrupt(0) timer_2hz_irq(void) {
     _slp();
