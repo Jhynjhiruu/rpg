@@ -19,7 +19,6 @@ typedef struct
     unsigned int canWalkOn: 1;
     unsigned int interactOnTouch: 1;
     
-    //u8 properties;
     // ...
     
     // callback function for interaction
